@@ -39,8 +39,11 @@ int main(int argc,char **argv) {
     while(!feof(fptr)) {
         memset(buffer, 0, BUFFER_SIZE);
         numread = fscanf(fptr, "%s", buffer);
-        buffer[BUFFER_SIZE] = 0;
-        printf("%d - %s\n",numread,buffer);
+        buffer[BUFFER_SIZE] = 0;    // ensure string ends
+        if (numread == 1) {
+            int value = atoi(buffer);
+            printf("%d\n",value);
+            }
     }
     fclose(fptr);
 
