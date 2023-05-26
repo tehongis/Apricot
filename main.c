@@ -10,27 +10,60 @@ struct node {
     struct node *hi;
 };
 
-int main(int argc,char **argv) {
-
-    for (int c = 0 ; c < argc; c++) {
-        printf("%d : %s\n",c,argv[c]);
-    }
-
+int *readdata(char *filename) {
     FILE *fptr;
-    fptr = fopen("random.txt","r");
+    printf("Filename: %s\n",filename);
+    fptr = fopen(filename,"r");
 
     if(fptr == NULL) {
         printf("File open error!");
         exit(1);
     }
 
+    fseek(fptr, 0, SEEK_END);
+    long int fsize = ftell(fptr);
+    printf("File size:%ld\n",fsize);
+    int *memptr = (int*)malloc(fsize+1);
+ 
+    if (memptr == NULL) {
+        printf("Memory not allocated.\n");
+        exit(0);
+    }
+    memset(memptr, 0, fsize+1);
+    fseek(fptr, 0, 0);
+    size_t bytesread = fread(memptr,1,fsize,fptr);
+    printf("Bytes read:%ld\n",bytesread);
+
+    fclose(fptr);
+    return memptr;
+}
+
+int main(int argc,char **argv) {
+/*
+    for (int c = 0 ; c < argc; c++) {
+        printf("%d : %s\n",c,argv[c]);
+    }
+*/
+
+    int *memptr = readdata("random2.txt");
+    printf("Mempointer: %p\n",memptr);
+
+    int count = 0;
+    printf("%d",memptr[count]);
+    while( memptr[count] != 0) {
+        printf("%d,%c\n",count, (char) memptr[count]);
+        count ++ ;
+    }
+    free(memptr);
+
+/*
     struct node* memptr;
     memptr = (struct node*)malloc(sizeof(struct node));
     if (memptr == NULL) {
         printf("Memory not allocated.\n");
         exit(0);
     }
-    free(memptr);
+
 
     struct node* treebase;
 
@@ -48,9 +81,9 @@ int main(int argc,char **argv) {
         // append it to current tree based on value
 
     }
-    fclose(fptr);
+*/
 
-    struct node example;
+//    struct node example;
 
     return 0;
 }
