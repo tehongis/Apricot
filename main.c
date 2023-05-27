@@ -2,8 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFFER_SIZE 512
-
 struct node {
     int value;
     struct node *low;
@@ -11,8 +9,9 @@ struct node {
 };
 
 int *readdata(char *filename) {
+
+    // try to open file
     FILE *fptr;
-    printf("Filename: %s\n",filename);
     fptr = fopen(filename,"r");
 
     if(fptr == NULL) {
@@ -20,9 +19,10 @@ int *readdata(char *filename) {
         exit(1);
     }
 
+
+    // check filesize, reserve memory and zerofill-it
     fseek(fptr, 0, SEEK_END);
     long int fsize = ftell(fptr);
-    printf("File size:%ld\n",fsize);
     int *memptr = (int*)malloc(fsize+1);
  
     if (memptr == NULL) {
@@ -30,10 +30,14 @@ int *readdata(char *filename) {
         exit(0);
     }
     memset(memptr, 0, fsize+1);
-    fseek(fptr, 0, 0);
-    size_t bytesread = fread(memptr,1,fsize,fptr);
-    printf("Bytes read:%ld\n",bytesread);
+    
 
+    // read filedata to allocated memory
+    fseek(fptr, 0, 0);
+    fread(memptr,1,fsize,fptr);
+
+
+    // close file and return allocated memory
     fclose(fptr);
     return memptr;
 }
@@ -45,15 +49,19 @@ int main(int argc,char **argv) {
     }
 */
 
-    int *memptr = readdata("random2.txt");
+    char *memptr = (char *) readdata("random2.txt");
     printf("Mempointer: %p\n",memptr);
+    printf("%s",memptr);
+    printf("\n");
+    printf("%d\n",strlen(memptr));
 
+/*
     int count = 0;
-    printf("%d",memptr[count]);
-    while( memptr[count] != 0) {
-        printf("%d,%c\n",count, (char) memptr[count]);
+    while( memptr[count] != 0 && count < 8) {
+        printf("%d,%c\n",count, (unsigned char) memptr[count]);
         count ++ ;
     }
+*/
     free(memptr);
 
 /*
