@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct node {
-    int value;
-    struct node *low;
-    struct node *hi;
+struct Node {
+    int x;
+    int y;
+    struct node *left;
+    struct node *right;
 };
 
 int *readdata(char *filename) {
@@ -29,18 +30,17 @@ int *readdata(char *filename) {
         printf("Memory not allocated.\n");
         exit(0);
     }
-    memset(memptr, 0, fsize+1);
-    
+    memset(memptr, 0, fsize+1);   
 
     // read filedata to allocated memory
     fseek(fptr, 0, 0);
     fread(memptr,1,fsize,fptr);
 
-
     // close file and return allocated memory
     fclose(fptr);
     return memptr;
 }
+
 
 int main(int argc,char **argv) {
 /*
@@ -49,49 +49,37 @@ int main(int argc,char **argv) {
     }
 */
 
-    char *memptr = (char *) readdata("random2.txt");
-    printf("Mempointer: %p\n",memptr);
-    printf("%s",memptr);
-    printf("\n");
-    printf("%d\n",strlen(memptr));
+    char *filedata = (char *) readdata("random2.txt");
 
-/*
-    int count = 0;
-    while( memptr[count] != 0 && count < 8) {
-        printf("%d,%c\n",count, (unsigned char) memptr[count]);
-        count ++ ;
+    int datasize = strlen(filedata);
+    printf("Mempointer: %p\n",filedata);
+    printf("Filesize: %d\n",datasize);
+
+    struct Node *base_node = NULL;
+    struct Node *current_node = base_node;
+
+    char *token;
+    while ((token = strsep(&filedata, "\n"))) {
+        char **restrict instate = NULL;
+        int numberA = atoi( strtok_r(token, "\t", &instate) );
+        int numberB = atoi( strtok_r(NULL, "\t", &instate) );
+
+        struct Node *new_node = malloc(sizeof(struct Node));
+        if (base_node = NULL) {
+            base_node = new_node;
+        }
+        
+        new_node->x = numberA;
+        new_node->y = numberB;
+
+        current_node = new_node;
+
+        //printf("%d %d\n",numberA,numberB);
     }
-*/
-    free(memptr);
 
-/*
-    struct node* memptr;
-    memptr = (struct node*)malloc(sizeof(struct node));
-    if (memptr == NULL) {
-        printf("Memory not allocated.\n");
-        exit(0);
-    }
+    free(filedata);
 
-
-    struct node* treebase;
-
-    int numread;
-    char buffer[BUFFER_SIZE];
-    while(!feof(fptr)) {
-        memset(buffer, 0, BUFFER_SIZE);
-        numread = fscanf(fptr, "%s", buffer);
-        buffer[BUFFER_SIZE] = 0;    // ensure string ends
-        if (numread == 1) {
-            int value = atoi(buffer);
-            printf("%d\n",value);          
-            }
-        // reserve new node 
-        // append it to current tree based on value
-
-    }
-*/
-
-//    struct node example;
+    free(base_node);
 
     return 0;
 }
