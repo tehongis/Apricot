@@ -1,3 +1,3 @@
 # Apricot
-Collection of different linux code projects with c, c++, javascript and python
+Collection of different linux code projects with C, C++, javascript and python
 
