@@ -10,7 +10,7 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
-
+#include <SFML/Audio.hpp>
 
 #include <box2d/box2d.h>
 //#include <Box2D/Box2D.h>
@@ -87,6 +87,20 @@ void b2World::DestroyBody(b2Body* body)
 void b2World::DestroyJoint(b2Joint* joint)
 */
 
+    sf::Music music;
+
+    if (!music.openFromFile("music/fsm-team-escp-quasarise.ogg")) {
+        std::cout << "Unable to load music." << std::endl;
+        exit(0);
+    }
+
+    sf::SoundBuffer shotBuffer;
+    if (!shotBuffer.loadFromFile("music/ping.ogg"))
+        return -1;
+
+    sf::Sound shotSound;
+    shotSound.setBuffer(shotBuffer);
+
     if (!sf::Shader::isAvailable())
     {
         std::cout << "No shader available." << std::endl;
@@ -94,7 +108,7 @@ void b2World::DestroyJoint(b2Joint* joint)
     }
 
     sf::Shader shader;
-    if (!shader.loadFromFile("vertex_shader.vert", "fragment_shader.frag"))
+    if (!shader.loadFromFile("shaders/vertex_shader.vert", "shaders/fragment_shader.frag"))
     {
         std::cout << "Failed to load shaders." << std::endl;
         exit(0);
@@ -102,7 +116,7 @@ void b2World::DestroyJoint(b2Joint* joint)
 
     sf::Texture texture;
     //if (!texture.loadFromFile("colored_transparent_packed.png", sf::IntRect(16*28, 16*2, 16, 16)) )
-    if (!texture.loadFromFile("colored_transparent_packed.png"))
+    if (!texture.loadFromFile("graphics/colored_transparent_packed.png"))
     {
         std::cout << "Failed to load texture." << std::endl;
         exit(0);
@@ -141,6 +155,10 @@ void b2World::DestroyJoint(b2Joint* joint)
     //playerShipSprite.rotate(-1.0f);
 
 
+    music.play();
+
+    int shotSkip = 0;
+
     float playerXpos = 400.0f;
 
     while (window.isOpen())
@@ -171,8 +189,15 @@ void b2World::DestroyJoint(b2Joint* joint)
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
             {
-                addAmmo(playerXpos);
+                if (shotSkip == 0) {
+                    addAmmo(playerXpos);
+                    shotSound.play();
+                    shotSkip=5;
+                    }
             }
+        if (shotSkip > 0) {
+            shotSkip--;
+        }
 
 
         playerShipSprite.setPosition(sf::Vector2f(playerXpos,580.0f));
