@@ -1,2 +1,0 @@
-# karhu
-Testing SFML

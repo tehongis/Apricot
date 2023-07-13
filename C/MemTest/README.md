@@ -1,2 +1,0 @@
-# Apricot
-Testing C lang
