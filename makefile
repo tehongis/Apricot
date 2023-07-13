@@ -1,9 +1,9 @@
 
-apricot		:	main.cpp
-			g++ -Wall -o apricot main.cpp -lsfml-graphics -lsfml-window -lsfml-system
+apricot.exe		:	main.cpp
+			g++ -Wall -o apricot.exe main.cpp -lsfml-graphics -lsfml-window -lsfml-system
 
-run			: apricot
-			./apricot
+run			: apricot.exe
+			./apricot.exe
 
-clean		: apricot
-			rm -rf apricot
+clean		: apricot.exe
+			rm -rf apricot.exe
