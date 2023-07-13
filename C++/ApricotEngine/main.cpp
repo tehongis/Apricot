@@ -16,6 +16,12 @@
 //#include <Box2D/Box2D.h>
 //#include <Box2D/Box2D.h>
 
+std::vector<sf::Vector2f> ammoList;
+
+void addAmmo(float xPos) {
+    ammoList.push_back(sf::Vector2f(xPos,550.0f));
+}
+
 
 int main(){
 
@@ -118,12 +124,24 @@ void b2World::DestroyJoint(b2Joint* joint)
     sf::ContextSettings settings = window.getSettings();
     std::cout << "GLSL version:" << settings.majorVersion << "." << settings.minorVersion << std::endl;
 
-    sf::Sprite sprite;
-    //sprite.setTexture(texture);
-    sprite.setTexture(texture);
-    sprite.setTextureRect(sf::IntRect(16*47, 16*2, 16, 16));
-    sprite.scale(sf::Vector2f(3.0f,3.0f));
-    sprite.setOrigin(sf::Vector2f(8.0f,8.0f));
+    sf::Sprite playerShipSprite;
+    //playerShipSprite.setTexture(texture);
+    playerShipSprite.setTexture(texture);
+    playerShipSprite.setTextureRect(sf::IntRect(16*47, 16*2, 16, 16));
+    playerShipSprite.setOrigin(sf::Vector2f(8.0f,8.0f));
+    playerShipSprite.scale(sf::Vector2f(2.0f,2.0f));
+    //playerShipSprite.rotate(-1.0f);
+
+    sf::Sprite ammoSprite;
+    //playerShipSprite.setTexture(texture);
+    ammoSprite.setTexture(texture);
+    ammoSprite.setTextureRect(sf::IntRect(16*22, 16*4, 16, 16));
+    ammoSprite.setOrigin(sf::Vector2f(8.0f,8.0f));
+    ammoSprite.scale(sf::Vector2f(1.0f,1.0f));
+    //playerShipSprite.rotate(-1.0f);
+
+
+    float playerXpos = 400.0f;
 
     while (window.isOpen())
     {
@@ -139,26 +157,51 @@ void b2World::DestroyJoint(b2Joint* joint)
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
             {
-                sprite.rotate(-1.0f);
+                if (playerXpos > 0) {
+                    playerXpos = playerXpos - 5.0f;
+                    }
             }
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
             {
-                sprite.rotate(1.0f);
+                if (playerXpos < 800) {
+                    playerXpos = playerXpos + 5.0f;
+                    }
             }
 
-        sprite.setPosition(sf::Vector2f(64.0f,64.0f));
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+            {
+                addAmmo(playerXpos);
+            }
+
+
+        playerShipSprite.setPosition(sf::Vector2f(playerXpos,580.0f));
 
         window.clear();
-        //window.draw(box,&shader);
-        //sprite.setRotation();
-        window.draw(sprite);
+        window.draw(box,&shader);
+        for(sf::Vector2f position : ammoList) {
+            ammoSprite.setPosition(position);
+            window.draw(ammoSprite);
+        }
+
+        //playerShipSprite.setRotation();
+        window.draw(playerShipSprite);
 
     shader.setUniform("u_time", clock.getElapsedTime().asSeconds());
     shader.setUniform("u_resolution", sf::Glsl::Vec2{ window.getSize() });
     shader.setUniform("u_mouse", sf::Glsl::Vec2{ mousePos });
 
         window.display();
+
+        std::vector<sf::Vector2f> tempammoList;
+        for(sf::Vector2f position : ammoList) {
+            if (position.y > 0) {
+                position.y = position.y - 10;
+                tempammoList.push_back(sf::Vector2f(position.x,position.y));
+            }
+        }
+        ammoList = tempammoList;
+
         window.setFramerateLimit(60);
     }
  
