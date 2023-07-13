@@ -166,6 +166,10 @@ void b2World::DestroyJoint(b2Joint* joint)
         sf::Vector2i pixelPos = sf::Mouse::getPosition(window);
         sf::Vector2f mousePos = window.mapPixelToCoords(pixelPos);
 
+        shader.setUniform("u_time", clock.getElapsedTime().asSeconds());
+        shader.setUniform("u_resolution", sf::Glsl::Vec2{ window.getSize() });
+        shader.setUniform("u_mouse", sf::Glsl::Vec2{ mousePos });
+
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -199,7 +203,6 @@ void b2World::DestroyJoint(b2Joint* joint)
             shotSkip--;
         }
 
-
         playerShipSprite.setPosition(sf::Vector2f(playerXpos,580.0f));
 
         window.clear();
@@ -211,10 +214,6 @@ void b2World::DestroyJoint(b2Joint* joint)
 
         //playerShipSprite.setRotation();
         window.draw(playerShipSprite);
-
-        shader.setUniform("u_time", clock.getElapsedTime().asSeconds());
-        shader.setUniform("u_resolution", sf::Glsl::Vec2{ window.getSize() });
-        shader.setUniform("u_mouse", sf::Glsl::Vec2{ mousePos });
 
         window.display();
 
