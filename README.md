@@ -1,3 +1,3 @@
 # Apricot
-Collection of different linux code projects with C, C++, javascript and python
+Trying to make simple game engine with SFML, Box2D and C++
 
