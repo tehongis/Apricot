@@ -187,9 +187,9 @@ void b2World::DestroyJoint(b2Joint* joint)
         //playerShipSprite.setRotation();
         window.draw(playerShipSprite);
 
-    shader.setUniform("u_time", clock.getElapsedTime().asSeconds());
-    shader.setUniform("u_resolution", sf::Glsl::Vec2{ window.getSize() });
-    shader.setUniform("u_mouse", sf::Glsl::Vec2{ mousePos });
+        shader.setUniform("u_time", clock.getElapsedTime().asSeconds());
+        shader.setUniform("u_resolution", sf::Glsl::Vec2{ window.getSize() });
+        shader.setUniform("u_mouse", sf::Glsl::Vec2{ mousePos });
 
         window.display();
 
