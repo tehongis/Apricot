@@ -12,80 +12,28 @@
 #include <SFML/OpenGL.hpp>
 #include <SFML/Audio.hpp>
 
-//#include <box2d/box2d.h>
-//#include <Box2D/Box2D.h>
-//#include <Box2D/Box2D.h>
+#define MAPSIZE_X 64
+#define MAPSIZE_Y 64
+
+int map[MAPSIZE_X*MAPSIZE_Y];
+
+void makeMap(){
+    for (int i = 0; i < sizeof(map);i++) {
+        map[i] = std::rand() % 1;
+    }
+}
 
 std::vector<sf::Vector2f> ammoList;
-
-void addAmmo(float xPos) {
+void addAmmo(float xPos){
     ammoList.push_back(sf::Vector2f(xPos,550.0f));
 }
 
-
 int main(){
 
-/*
-b2Body* b2World::CreateBody(const b2BodyDef* def)
-b2Joint* b2World::CreateJoint(const b2JointDef* def)
 
-
-b2Fixture* b2Body::CreateFixture(const b2FixtureDef* def)
-void b2Body::DestroyFixture(b2Fixture* fixture)
-or
-b2Fixture* b2Body::CreateFixture(const b2Shape* shape, float density)
-
-
-//Creating a World:
-b2Vec2 gravity(0.0f, -10.0f);
-b2World world(gravity);
-
-// fixed body:
-b2BodyDef groundBodyDef;
-groundBodyDef.position.Set(0.0f, -10.0f);
-
-b2Body* groundBody = world.CreateBody(&groundBodyDef);
-
-b2PolygonShape groundBox;
-groundBox.SetAsBox(50.0f, 10.0f);
-
-groundBody->CreateFixture(&groundBox, 0.0f);
-
-
-// dynamic body:
-b2BodyDef bodyDef;
-bodyDef.type = b2_dynamicBody;
-bodyDef.position.Set(0.0f, 4.0f);
-b2Body* body = world.CreateBody(&bodyDef);
-
-b2PolygonShape dynamicBox;
-dynamicBox.SetAsBox(1.0f, 1.0f);
-
-b2FixtureDef fixtureDef;
-fixtureDef.shape = &dynamicBox;
-fixtureDef.density = 1.0f;
-fixtureDef.friction = 0.3f;
-
-body->CreateFixture(&fixtureDef);
-
-
-//update:
-float timeStep = 1.0f / 60.0f;
-int32 velocityIterations = 6;
-int32 positionIterations = 2;
-
-for (int32 i = 0; i < 60; ++i)
-{
-    world.Step(timeStep, velocityIterations, positionIterations);
-    b2Vec2 position = body->GetPosition();
-    float angle = body->GetAngle();
-    printf("%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
-}
-
-// cleanup:
-void b2World::DestroyBody(b2Body* body)
-void b2World::DestroyJoint(b2Joint* joint)
-*/
+    std::cout << "Making map." << std::endl;
+    makeMap();
+    std::cout << "Map done." << std::endl;
 
     sf::Music music;
 
@@ -121,7 +69,6 @@ void b2World::DestroyJoint(b2Joint* joint)
         std::cout << "Failed to load texture." << std::endl;
         exit(0);
     }
-
 
     sf::Clock clock;
 
@@ -206,6 +153,24 @@ void b2World::DestroyJoint(b2Joint* joint)
         playerShipSprite.setPosition(sf::Vector2f(playerXpos,580.0f));
 
         window.clear();
+
+        sf::Sprite mapTileSprite;
+
+        for (int y = 0; y < MAPSIZE_Y; y++) {
+            for (int x = 0; x < MAPSIZE_X; x++) {
+                int tilevalue = map[y*MAPSIZE_X+x];
+                if (tilevalue > 0) {
+                    mapTileSprite.setTexture(texture);
+                    mapTileSprite.setTextureRect(sf::IntRect(16 * (tilevalue % 48), 16* (int)tilevalue/48, 16, 16));
+                    mapTileSprite.setOrigin(sf::Vector2f(8.0f,8.0f));
+                    mapTileSprite.scale(sf::Vector2f(2.0f,2.0f));
+                    mapTileSprite.setPosition(x*16,y*16);
+                    window.draw(mapTileSprite);
+                    }
+                }
+            }
+
+
         window.draw(box,&shader);
         for(sf::Vector2f position : ammoList) {
             ammoSprite.setPosition(position);
@@ -232,3 +197,72 @@ void b2World::DestroyJoint(b2Joint* joint)
     return 0;
 }
 
+
+
+
+/*
+
+#include <box2d/box2d.h>
+#include <Box2D/Box2D.h>
+#include <Box2D/Box2D.h>
+
+b2Body* b2World::CreateBody(const b2BodyDef* def)
+b2Joint* b2World::CreateJoint(const b2JointDef* def)
+
+
+b2Fixture* b2Body::CreateFixture(const b2FixtureDef* def)
+void b2Body::DestroyFixture(b2Fixture* fixture)
+or
+b2Fixture* b2Body::CreateFixture(const b2Shape* shape, float density)
+
+
+//Creating a World:
+b2Vec2 gravity(0.0f, -10.0f);
+b2World world(gravity);
+
+// fixed body:
+b2BodyDef groundBodyDef;
+groundBodyDef.position.Set(0.0f, -10.0f);
+
+b2Body* groundBody = world.CreateBody(&groundBodyDef);
+
+b2PolygonShape groundBox;
+groundBox.SetAsBox(50.0f, 10.0f);
+
+groundBody->CreateFixture(&groundBox, 0.0f);
+
+
+// dynamic body:
+b2BodyDef bodyDef;
+bodyDef.type = b2_dynamicBody;
+bodyDef.position.Set(0.0f, 4.0f);
+b2Body* body = world.CreateBody(&bodyDef);
+
+b2PolygonShape dynamicBox;
+dynamicBox.SetAsBox(1.0f, 1.0f);
+
+b2FixtureDef fixtureDef;
+fixtureDef.shape = &dynamicBox;
+fixtureDef.density = 1.0f;
+fixtureDef.friction = 0.3f;
+
+body->CreateFixture(&fixtureDef);
+
+
+//update:
+float timeStep = 1.0f / 60.0f;
+int32 velocityIterations = 6;
+int32 positionIterations = 2;
+
+for (int32 i = 0; i < 60; ++i)
+{
+    world.Step(timeStep, velocityIterations, positionIterations);
+    b2Vec2 position = body->GetPosition();
+    float angle = body->GetAngle();
+    printf("%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
+}
+
+// cleanup:
+void b2World::DestroyBody(b2Body* body)
+void b2World::DestroyJoint(b2Joint* joint)
+*/
