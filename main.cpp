@@ -15,11 +15,15 @@
 #define MAPSIZE_X 64
 #define MAPSIZE_Y 64
 
-int map[MAPSIZE_X*MAPSIZE_Y];
+char map[MAPSIZE_X*MAPSIZE_Y+1];
 
 void makeMap(){
-    for (int i = 0; i < sizeof(map);i++) {
-        map[i] = std::rand() % 1;
+    for (int i = 0 ; i < sizeof(map) ; i++) {
+        int random = std::rand() % 2;
+        std::cout << i << " value ";
+
+        map[i] = random;
+        std::cout << random << std::endl;
     }
 }
 
@@ -30,12 +34,14 @@ void addAmmo(float xPos){
 
 int main(){
 
-
+    std::cout << MAPSIZE_X << " times" << MAPSIZE_Y << " should be " << MAPSIZE_X*MAPSIZE_Y << std::endl;
     std::cout << "Making map." << std::endl;
     makeMap();
     std::cout << "Map done." << std::endl;
 
     sf::Music music;
+
+    std::cout << "Loading music." << std::endl;
 
     if (!music.openFromFile("music/fsm-team-escp-quasarise.ogg")) {
         std::cout << "Unable to load music." << std::endl;
@@ -158,7 +164,7 @@ int main(){
 
         for (int y = 0; y < MAPSIZE_Y; y++) {
             for (int x = 0; x < MAPSIZE_X; x++) {
-                int tilevalue = map[y*MAPSIZE_X+x];
+                char tilevalue = map[y*MAPSIZE_X+x];
                 if (tilevalue > 0) {
                     mapTileSprite.setTexture(texture);
                     mapTileSprite.setTextureRect(sf::IntRect(16 * (tilevalue % 48), 16* (int)tilevalue/48, 16, 16));
