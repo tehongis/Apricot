@@ -272,3 +272,28 @@ for (int32 i = 0; i < 60; ++i)
 void b2World::DestroyBody(b2Body* body)
 void b2World::DestroyJoint(b2Joint* joint)
 */
+
+
+/*
+// Shader checkerboard
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    // Normalized pixel coordinates (from 0 to 1)
+    vec2 uv = fragCoord/iResolution.xy;
+
+    // Time varying pixel color
+    // vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));
+    
+    vec2 size = iResolution.xy / 40.0;
+    
+    float total = floor(uv.x * size.x) + floor(uv.y * size.y);
+    bool isEven = mod(total,2.0) == 0.0;
+
+    vec4 colBlack = vec4(0.0,0.0,0.0,1.0);
+    vec4 colWhite = vec4(1.0,1.0,1.0,1.0);
+
+    // Output to screen
+    fragColor = (isEven) ? colBlack : colWhite;
+}
+*/
