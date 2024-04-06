@@ -83,7 +83,7 @@ void loadBoxes() {
 
 std::vector<sf::Vector2f> ammoList;
 void addAmmo(float xPos){
-    ammoList.push_back(sf::Vector2f(xPos,550.0f));
+    ammoList.push_back(sf::Vector2f(xPos,1050.0f));
 }
 
 int main(){
@@ -134,7 +134,7 @@ int main(){
 
     sf::Texture textureBackground;
     //if (!texture.loadFromFile("colored_transparent_packed.png", sf::IntRect(16*28, 16*2, 16, 16)) )
-    if (!textureBackground.loadFromFile("graphics/ArtDecoGirl.png"))
+    if (!textureBackground.loadFromFile("graphics/wp3837738.jpg"))
     {
         std::cout << "Failed to load background texture." << std::endl;
         exit(0);
@@ -155,7 +155,9 @@ int main(){
 
     sf::Clock clock;
 
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML testing.");
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML testing.",sf::Style::Fullscreen);
+    //sf::View worldview(RenderWindow.getDefaultView());
+
     window.setMouseCursorVisible(false);
 
     sf::RectangleShape box(sf::Vector2f(texture.getSize()));
@@ -170,7 +172,9 @@ int main(){
     //sf::CircleShape shape(300.f);
     //shape.setFillColor(sf::Color::Green);
     background.setTexture(&textureBackground);
-    sf::Vector2f backgroundLoc(0.0f,-800.0f);
+    sf::Vector2f bgSize =  sf::Vector2f(textureBackground.getSize());
+    float x = (1920.0/2) - (bgSize.x / 2);
+    sf::Vector2f backgroundLoc(x ,-500.0f);
     background.setPosition(backgroundLoc);
 
 
@@ -206,7 +210,7 @@ int main(){
 
     int shotSkip = 0;
 
-    float playerXpos = 400.0f;
+    float playerXpos = 1920.0/2;
 
     while (window.isOpen())
     {
@@ -224,6 +228,12 @@ int main(){
                 window.close();
         }
 
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+            {
+                window.close();
+            }
+
+
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
             {
                 if (playerXpos > 0) {
@@ -234,7 +244,7 @@ int main(){
 
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
             {
-                if (playerXpos < 800) {
+                if (playerXpos < 1920) {
                     playerXpos = playerXpos + 5.0f;
                     }
             }
@@ -262,7 +272,7 @@ int main(){
             }
 
 
-        playerShipSprite.setPosition(sf::Vector2f(playerXpos,580.0f));
+        playerShipSprite.setPosition(sf::Vector2f(playerXpos,1060.0f));
 
         window.clear();
         window.draw(background,&shader);
@@ -299,7 +309,7 @@ int main(){
         for(b2Body* body: boxList) {
             b2Vec2 position = body->GetPosition();
             float angle = body->GetAngle();
-            fysicsSprite.setPosition(sf::Vector2f(400+position.x*50.0,300+position.y*50.0));
+            fysicsSprite.setPosition(sf::Vector2f(1920/2+position.x*50.0,780+position.y*50.0));
             fysicsSprite.setRotation(angle);
             window.draw(fysicsSprite);
         }
