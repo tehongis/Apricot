@@ -12,19 +12,68 @@
 #include <SFML/OpenGL.hpp>
 #include <SFML/Audio.hpp>
 
+#include <box2d/box2d.h>
+
 #define MAPSIZE_X 64
 #define MAPSIZE_Y 64
 
 char map[MAPSIZE_X*MAPSIZE_Y+1];
 
+
+
+
+
+int32 velocityIterations = 6;
+int32 positionIterations = 2;
+
+float timeStep = 1.0f / 60.0f;
+
+float randomFloat()
+{
+    return 1.0f - (float)(rand()) / (float)(rand());
+}
+
+b2Vec2 gravity(0.0f, 10.0f);
+b2World world(gravity);
+
+
 void makeMap(){
-    for (int i = 0 ; i < sizeof(map) ; i++) {
+    for (long unsigned int i = 0 ; i < sizeof(map) ; i++) {
         int random = std::rand() % 2;
         std::cout << i << " value ";
 
         map[i] = random;
         std::cout << random << std::endl;
     }
+}
+
+std::vector<b2Body *> boxList;
+
+void loadBoxes() {
+
+    // Box shape
+    b2PolygonShape dynamicBox;
+    dynamicBox.SetAsBox(0.25f, 0.25f);
+
+    // Box fixture
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &dynamicBox;
+    fixtureDef.density = 1.0f;
+    fixtureDef.friction = 0.1f;
+
+    
+    for (int i=0;i<20;i++) {
+        b2BodyDef bodyDef;
+        bodyDef.type = b2_dynamicBody;
+        float y = randomFloat() * 4.0f - 8.0;
+        bodyDef.position.Set(0.0, y);
+        b2Body* body = world.CreateBody(&bodyDef);
+        body->CreateFixture(&fixtureDef);
+
+        boxList.push_back(body);
+
+    }
+
 }
 
 std::vector<sf::Vector2f> ammoList;
@@ -34,6 +83,7 @@ void addAmmo(float xPos){
 
 int main(){
 
+    
     std::cout << MAPSIZE_X << " times" << MAPSIZE_Y << " should be " << MAPSIZE_X*MAPSIZE_Y << std::endl;
     std::cout << "Making map." << std::endl;
     makeMap();
@@ -76,6 +126,18 @@ int main(){
         exit(0);
     }
 
+    // box2d ground body
+    b2BodyDef groundBodyDef;
+    groundBodyDef.position.Set(0.0f, 15.0f);
+    b2PolygonShape groundBox;
+    groundBox.SetAsBox(50.0f, 10.0f);
+    b2Body* groundBody;
+    groundBody = world.CreateBody(&groundBodyDef);
+    groundBody->CreateFixture(&groundBox, 0.0f);
+
+
+    loadBoxes();
+
     sf::Clock clock;
 
     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML testing.");
@@ -90,6 +152,13 @@ int main(){
 
     sf::ContextSettings settings = window.getSettings();
     std::cout << "GLSL version:" << settings.majorVersion << "." << settings.minorVersion << std::endl;
+
+
+    sf::Sprite fysicsSprite;
+    fysicsSprite.setTexture(texture);
+    fysicsSprite.setTextureRect(sf::IntRect(16*1, 16*10, 16, 16));
+    fysicsSprite.setOrigin(sf::Vector2f(8.0f,8.0f));
+    fysicsSprite.scale(sf::Vector2f(2.0f,2.0f));
 
     sf::Sprite playerShipSprite;
     //playerShipSprite.setTexture(texture);
@@ -107,6 +176,7 @@ int main(){
     ammoSprite.scale(sf::Vector2f(1.0f,1.0f));
     //playerShipSprite.rotate(-1.0f);
 
+    void box2DDynBody();
 
     music.play();
 
@@ -137,6 +207,7 @@ int main(){
                     }
             }
 
+
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
             {
                 if (playerXpos < 800) {
@@ -156,10 +227,19 @@ int main(){
             shotSkip--;
         }
 
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::F))
+            {
+            for(b2Body* body: boxList) {
+                b2Vec2 force = b2Vec2(0.0f, -10.0f);
+                body->ApplyForceToCenter(force, true);
+                }
+            }
+
+
         playerShipSprite.setPosition(sf::Vector2f(playerXpos,580.0f));
 
         window.clear();
-
+/*
         sf::Sprite mapTileSprite;
 
         for (int y = 0; y < MAPSIZE_Y; y++) {
@@ -176,11 +256,24 @@ int main(){
                 }
             }
 
+*/
 
-        window.draw(box,&shader);
+        // Draw all tiles on the screen
+//        window.draw(box,&shader);
+
         for(sf::Vector2f position : ammoList) {
             ammoSprite.setPosition(position);
             window.draw(ammoSprite);
+        }
+
+        world.Step(timeStep, velocityIterations, positionIterations);
+
+        for(b2Body* body: boxList) {
+            b2Vec2 position = body->GetPosition();
+            float angle = body->GetAngle();
+            fysicsSprite.setPosition(sf::Vector2f(400+position.x*50.0,300+position.y*50.0));
+            fysicsSprite.setRotation(angle);
+            window.draw(fysicsSprite);
         }
 
         //playerShipSprite.setRotation();
