@@ -12,13 +12,35 @@
 #include <SFML/OpenGL.hpp>
 #include <SFML/Audio.hpp>
 
+#include <box2d/box2d.h>
+
 #define MAPSIZE_X 64
 #define MAPSIZE_Y 64
 
 char map[MAPSIZE_X*MAPSIZE_Y+1];
 
+
+
+
+
+int32 velocityIterations = 6;
+int32 positionIterations = 2;
+
+float timeStep = 1.0f / 60.0f;
+
+float randomFloat()
+{
+    float value = 1.0f - ((float)(rand()) / (float)(RAND_MAX) ) * 2.0;
+    //printf("%f\n",value);
+    return value;
+}
+
+b2Vec2 gravity(0.0f, 10.0f);
+b2World world(gravity);
+
+
 void makeMap(){
-    for (int i = 0 ; i < sizeof(map) ; i++) {
+    for (long unsigned int i = 0 ; i < sizeof(map) ; i++) {
         int random = std::rand() % 2;
         std::cout << i << " value ";
 
@@ -27,13 +49,46 @@ void makeMap(){
     }
 }
 
+std::vector<b2Body *> boxList;
+
+void loadBoxes() {
+
+    // Box shape
+    b2PolygonShape dynamicBox;
+    dynamicBox.SetAsBox(0.30f, 0.30f);
+
+    // Box fixture
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &dynamicBox;
+    fixtureDef.density = 1.0f;
+    fixtureDef.friction = 0.4f;
+    
+
+    
+    for (int i=0;i<200;i++) {
+        b2BodyDef bodyDef;
+        bodyDef.type = b2_dynamicBody;
+        float x = randomFloat();
+        float y = randomFloat() * 4.0f - 8.0;
+        bodyDef.position.Set(x, y);
+        bodyDef.angularVelocity = randomFloat();
+        bodyDef.angularDamping = 0.1f;
+        b2Body* body = world.CreateBody(&bodyDef);
+        body->CreateFixture(&fixtureDef);
+        boxList.push_back(body);
+
+    }
+
+}
+
 std::vector<sf::Vector2f> ammoList;
 void addAmmo(float xPos){
-    ammoList.push_back(sf::Vector2f(xPos,550.0f));
+    ammoList.push_back(sf::Vector2f(xPos,1050.0f));
 }
 
 int main(){
 
+    
     std::cout << MAPSIZE_X << " times" << MAPSIZE_Y << " should be " << MAPSIZE_X*MAPSIZE_Y << std::endl;
     std::cout << "Making map." << std::endl;
     makeMap();
@@ -72,13 +127,37 @@ int main(){
     //if (!texture.loadFromFile("colored_transparent_packed.png", sf::IntRect(16*28, 16*2, 16, 16)) )
     if (!texture.loadFromFile("graphics/colored_transparent_packed.png"))
     {
-        std::cout << "Failed to load texture." << std::endl;
+        std::cout << "Failed to load sprite texture." << std::endl;
         exit(0);
     }
 
+
+    sf::Texture textureBackground;
+    //if (!texture.loadFromFile("colored_transparent_packed.png", sf::IntRect(16*28, 16*2, 16, 16)) )
+    if (!textureBackground.loadFromFile("graphics/wp3837738.jpg"))
+    {
+        std::cout << "Failed to load background texture." << std::endl;
+        exit(0);
+    }
+
+
+    // box2d ground body
+    b2BodyDef groundBodyDef;
+    groundBodyDef.position.Set(0.0f, 15.0f);
+    b2PolygonShape groundBox;
+    groundBox.SetAsBox(50.0f, 10.0f);
+    b2Body* groundBody;
+    groundBody = world.CreateBody(&groundBodyDef);
+    groundBody->CreateFixture(&groundBox, 0.0f);
+
+
+    loadBoxes();
+
     sf::Clock clock;
 
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML testing.");
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML testing.",sf::Style::Fullscreen);
+    //sf::View worldview(RenderWindow.getDefaultView());
+
     window.setMouseCursorVisible(false);
 
     sf::RectangleShape box(sf::Vector2f(texture.getSize()));
@@ -88,8 +167,26 @@ int main(){
     sf::Vector2f boxLoc(0.0f,100.0f);
     box.setPosition(boxLoc);
 
+
+    sf::RectangleShape background(sf::Vector2f(textureBackground.getSize()));
+    //sf::CircleShape shape(300.f);
+    //shape.setFillColor(sf::Color::Green);
+    background.setTexture(&textureBackground);
+    sf::Vector2f bgSize =  sf::Vector2f(textureBackground.getSize());
+    float x = (1920.0/2) - (bgSize.x / 2);
+    sf::Vector2f backgroundLoc(x ,-500.0f);
+    background.setPosition(backgroundLoc);
+
+
     sf::ContextSettings settings = window.getSettings();
     std::cout << "GLSL version:" << settings.majorVersion << "." << settings.minorVersion << std::endl;
+
+
+    sf::Sprite fysicsSprite;
+    fysicsSprite.setTexture(texture);
+    fysicsSprite.setTextureRect(sf::IntRect(16*23, 16*3, 16, 16));
+    fysicsSprite.setOrigin(sf::Vector2f(8.0f,8.0f));
+    fysicsSprite.scale(sf::Vector2f(2.0f,2.0f));
 
     sf::Sprite playerShipSprite;
     //playerShipSprite.setTexture(texture);
@@ -107,12 +204,13 @@ int main(){
     ammoSprite.scale(sf::Vector2f(1.0f,1.0f));
     //playerShipSprite.rotate(-1.0f);
 
+    void box2DDynBody();
 
     music.play();
 
     int shotSkip = 0;
 
-    float playerXpos = 400.0f;
+    float playerXpos = 1920.0/2;
 
     while (window.isOpen())
     {
@@ -130,6 +228,12 @@ int main(){
                 window.close();
         }
 
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+            {
+                window.close();
+            }
+
+
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
             {
                 if (playerXpos > 0) {
@@ -137,9 +241,10 @@ int main(){
                     }
             }
 
+
         if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
             {
-                if (playerXpos < 800) {
+                if (playerXpos < 1920) {
                     playerXpos = playerXpos + 5.0f;
                     }
             }
@@ -156,10 +261,23 @@ int main(){
             shotSkip--;
         }
 
-        playerShipSprite.setPosition(sf::Vector2f(playerXpos,580.0f));
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::F))
+            {
+            for(b2Body* body: boxList) {
+                float x = randomFloat() * 10.0f;
+                float y = (-1.0 + randomFloat()) * 40.0f;
+                b2Vec2 force = b2Vec2(x, y);
+                body->ApplyForceToCenter(force, true);
+                }
+            }
+
+
+        playerShipSprite.setPosition(sf::Vector2f(playerXpos,1060.0f));
 
         window.clear();
+        window.draw(background,&shader);
 
+/*
         sf::Sprite mapTileSprite;
 
         for (int y = 0; y < MAPSIZE_Y; y++) {
@@ -176,11 +294,24 @@ int main(){
                 }
             }
 
+*/
 
-        window.draw(box,&shader);
+        // Draw all tiles on the screen
+//        window.draw(box,&shader);
+
         for(sf::Vector2f position : ammoList) {
             ammoSprite.setPosition(position);
             window.draw(ammoSprite);
+        }
+
+        world.Step(timeStep, velocityIterations, positionIterations);
+
+        for(b2Body* body: boxList) {
+            b2Vec2 position = body->GetPosition();
+            float angle = body->GetAngle();
+            fysicsSprite.setPosition(sf::Vector2f(1920/2+position.x*50.0,780+position.y*50.0));
+            fysicsSprite.setRotation(angle);
+            window.draw(fysicsSprite);
         }
 
         //playerShipSprite.setRotation();
