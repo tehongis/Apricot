@@ -3,7 +3,7 @@
 #Box2D			E:\GitHub\box2d\include
 
 apricot.exe		:	main.cpp
-			cl /std:c++17 /Wall /O2 /Fe:apricot.exe /IE:\GitHub\SFML-2.6.1\include main.cpp /link /LIBPATH:"E:\GitHub\SFML-2.6.1\lib"  sfml-graphics.lib sfml-window.lib sfml-system.lib sfml-audio.lib
+			cl /std:c++17 /Wall /O2 /Fe:apricot.exe /IE:\GitHub\SFML-2.6.1\include main.cpp /link /LIBPATH:"E:\GitHub\SFML-2.6.1\lib"  sfml-graphics.lib sfml-window.lib sfml-system.lib sfml-audio.lib box2d.lib
 
 run			: apricot.exe
 			./apricot.exe
